@@ -4,7 +4,8 @@ from cryptography.hazmat.primitives import constant_time, hashes, hmac
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.backends import default_backend
 backend = default_backend()
-
+Segmentlog = 20
+Segmentlength = 1048576
 
 def Gen_Scrypt_Instance(salt):
 	kdf = Scrypt(
@@ -38,7 +39,7 @@ def Decrypt_Key_Scrypt(salt, Hash, Key): #Standart Zeros | Key unvollstaendig | 
 		return 0
 
 def encrypt_file(key, in_filename, out_filename=None): #, chunksize=64*1024
-	
+
 	if not out_filename:
 		out_filename = in_filename + '.enc'
 
@@ -57,7 +58,13 @@ def encrypt_file(key, in_filename, out_filename=None): #, chunksize=64*1024
 
 	with open(out_filename, 'wb') as outfile:
 		outfile.seek(96)
-		for i in range(Filesize>>4):
+
+		for i in range(Filesize>>Segmentlog):
+			Segment = in_file.read(Segmentlength)
+			HMAC.update(Segment)
+			outfile.write(encryptor.update(Segment))
+
+		for i in range((Filesize&(Segmentlength-1))>>4):
 			Segment = in_file.read(16)
 			HMAC.update(Segment)
 			outfile.write(encryptor.update(Segment))
@@ -96,10 +103,15 @@ def decrypt_file(key, in_filename, out_filename=None): #, chunksize=24*1024
 
 	HMAC.update(iv)
 	with open(out_filename, 'wb') as outfile:
-		for i in range((Filesize>>4)-7):
+
+		for i in range((Filesize-96)>>Segmentlog):
+			Segment = in_file.read(Segmentlength)
+			Segment = decryptor.update(Segment)	
+			outfile.write(Segment)
+			HMAC.update(Segment)
+
+		for i in range(((Filesize&(Segmentlength-1))>>4)-7):
 			Segment = in_file.read(16)
-			if not Segment:
-				break
 			Segment = decryptor.update(Segment)	
 			outfile.write(Segment)
 			HMAC.update(Segment)
