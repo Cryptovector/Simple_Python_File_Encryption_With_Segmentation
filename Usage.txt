@@ -1,0 +1,2 @@
+python En_decryption.py -e -k PASSWORD -f Test.txt
+python En_decryption.py -d -k PASSWORD -f Test.txt.enc

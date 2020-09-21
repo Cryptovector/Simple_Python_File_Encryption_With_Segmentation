@@ -1,0 +1,17 @@
+Key-Derivation and Key must be known and must be calculated to change Data, Detect [Encryption can not be Detected (indistinguishable from Random Data)], or Read Data from File 
+
+Known Variables
+ -Salt for Key Deriv func
+ -Hash of Key Deriv func
+ -HMAC
+ -IV
+ -ENC_File
+
+Unknown Variables
+ -Key ?
+ -Deriv_Key
+
+The IV and Salt are Random by default HMAC is like the Hash and ENC_File Cryptographic Random with reference to Deriv_Key.
+This means what "Key" must be known and derived to Deriv_Key to Change, Detect or Read the Encrypted Data.  
+
+(Paddinglength and Padding is Encrypted with File)
